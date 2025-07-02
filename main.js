@@ -242,6 +242,45 @@ class DecisionScale {
         }
     }
 
+    updateDecision() {
+        const redTotal = this.redFlags.reduce((sum, flag) => sum + flag.weight, 0);
+        const greenTotal = this.greenFlags.reduce((sum, flag) => sum + flag.weight, 0);
+        
+        let decision = '';
+        let className = '';
+        
+        if (redTotal === 0 && greenTotal === 0) {
+            decision = 'Add flags to see recommendation';
+            className = 'neutral';
+        } else if (greenTotal > redTotal) {
+            const margin = greenTotal - redTotal;
+            if (margin >= 5) {
+                decision = '✅ APPROVE - Strong positive indicators';
+            } else {
+                decision = '✅ APPROVE - Positive indicators outweigh concerns';
+            }
+            className = 'approve';
+        } else if (redTotal > greenTotal) {
+            const margin = redTotal - greenTotal;
+            if (margin >= 10) {
+                decision = '❌ DENY - Significant concerns identified';
+                className = 'deny';
+            } else if (margin >= 3) {
+                decision = '⚠️ ADD CONDITIONS - Address concerns before proceeding';
+                className = 'conditions';
+            } else {
+                decision = '⚠️ PROCEED WITH CAUTION - Minor concerns present';
+                className = 'conditions';
+            }
+        } else {
+            decision = '⚖️ BALANCED - Equal weight, requires additional analysis';
+            className = 'neutral';
+        }
+        
+        this.decisionResult.textContent = decision;
+        this.decisionResult.className = `decision-result ${className}`;
+    }
+
     calculateFlagsHeight(flags) {
         let totalHeight = 0;
         const gapBetweenFlags = 6;
