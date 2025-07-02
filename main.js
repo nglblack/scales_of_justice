@@ -8,6 +8,7 @@ class DecisionScale {
         this.bindEvents();
         this.updateTotals();
         this.updateDecision();
+        this.updatePanHeights();
     }
     
     initializeElements() {
@@ -85,10 +86,15 @@ class DecisionScale {
             this.greenFlags = this.greenFlags.filter(flag => flag.id !== flagId);
         }
         
+        // Remove any existing tooltips first
+        const existingTooltips = document.querySelectorAll('.flag-tooltip');
+        existingTooltips.forEach(tooltip => tooltip.remove());
+        
         document.getElementById(`flag-${flagId}`).remove();
         this.updateTotals();
         this.updateScale();
         this.updateDecision();
+        this.updatePanHeights();
     }
     
     renderFlag(flag) {
@@ -119,6 +125,9 @@ class DecisionScale {
         this.addTooltip(flagElement, flag);
         
         container.appendChild(flagElement);
+        
+        // Update pan heights after adding flag
+        this.updatePanHeights();
     }
     
     addTooltip(element, flag) {
@@ -136,8 +145,44 @@ class DecisionScale {
             document.body.appendChild(tooltip);
             
             const rect = element.getBoundingClientRect();
-            tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
-            tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+            const tooltipRect = tooltip.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Calculate initial position (above the element)
+            let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+            let top = rect.top - tooltipRect.height - 10;
+            
+            // Adjust horizontal position if tooltip goes off screen
+            if (left < 10) {
+                left = 10;
+            } else if (left + tooltipRect.width > viewportWidth - 10) {
+                left = viewportWidth - tooltipRect.width - 10;
+            }
+            
+            // If tooltip would go above viewport, show it below instead
+            if (top < 10) {
+                top = rect.bottom + 10;
+                tooltip.classList.add('tooltip-below');
+            }
+            
+            // If still off screen below, position it to the side
+            if (top + tooltipRect.height > viewportHeight - 10) {
+                top = rect.top + rect.height / 2 - tooltipRect.height / 2;
+                
+                // Try to position to the right first
+                if (rect.right + tooltipRect.width + 15 < viewportWidth) {
+                    left = rect.right + 15;
+                    tooltip.classList.add('tooltip-right');
+                } else {
+                    // Position to the left
+                    left = rect.left - tooltipRect.width - 15;
+                    tooltip.classList.add('tooltip-left');
+                }
+            }
+            
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
             
             setTimeout(() => tooltip.classList.add('show'), 10);
         });
@@ -196,44 +241,56 @@ class DecisionScale {
             this.scaleBeam.style.filter = 'none';
         }
     }
+
+    calculateFlagsHeight(flags) {
+        let totalHeight = 0;
+        const gapBetweenFlags = 6;
+        
+        flags.forEach(flag => {
+            const flagHeight = Math.max(30, flag.weight * 4);
+            totalHeight += flagHeight + gapBetweenFlags;
+        });
+        
+        return totalHeight;
+    }
     
-    updateDecision() {
+    updatePanHeights() {
+        const leftPan = document.getElementById('leftPan');
+        const rightPan = document.getElementById('rightPan');
+        
+        // Calculate required height for each pan based on content
+        const redFlagsHeight = this.calculateFlagsHeight(this.redFlags);
+        const greenFlagsHeight = this.calculateFlagsHeight(this.greenFlags);
+        
+        // Set minimum height and add padding for label and spacing
+        const minPanHeight = 120;
+        const labelAndPadding = 60; // Space for label and padding
+        
+        const leftPanHeight = Math.max(minPanHeight, redFlagsHeight + labelAndPadding);
+        const rightPanHeight = Math.max(minPanHeight, greenFlagsHeight + labelAndPadding);
+        
+        leftPan.style.height = `${leftPanHeight}px`;
+        rightPan.style.height = `${rightPanHeight}px`;
+        
+        // Calculate the rotation effect on total height needed
         const redTotal = this.redFlags.reduce((sum, flag) => sum + flag.weight, 0);
         const greenTotal = this.greenFlags.reduce((sum, flag) => sum + flag.weight, 0);
+        const difference = greenTotal - redTotal;
+        const degreesPerPoint = 1.5;
+        const maxTilt = 45;
+        let tiltAngle = Math.max(-maxTilt, Math.min(maxTilt, difference * degreesPerPoint));
         
-        let decision = '';
-        let className = '';
+        // Calculate additional height needed due to rotation
+        const maxPanHeight = Math.max(leftPanHeight, rightPanHeight);
+        const beamWidth = 640; // Scale beam width
+        const rotationRadians = (Math.abs(tiltAngle) * Math.PI) / 180;
+        const additionalHeightFromRotation = (beamWidth / 2) * Math.sin(rotationRadians);
         
-        if (redTotal === 0 && greenTotal === 0) {
-            decision = 'Add flags to see recommendation';
-            className = 'neutral';
-        } else if (greenTotal > redTotal) {
-            const margin = greenTotal - redTotal;
-            if (margin >= 5) {
-                decision = '✅ APPROVE - Strong positive indicators';
-            } else {
-                decision = '✅ APPROVE - Positive indicators outweigh concerns';
-            }
-            className = 'approve';
-        } else if (redTotal > greenTotal) {
-            const margin = redTotal - greenTotal;
-            if (margin >= 10) {
-                decision = '❌ DENY - Significant concerns identified';
-                className = 'deny';
-            } else if (margin >= 3) {
-                decision = '⚠️ ADD CONDITIONS - Address concerns before proceeding';
-                className = 'conditions';
-            } else {
-                decision = '⚠️ PROCEED WITH CAUTION - Minor concerns present';
-                className = 'conditions';
-            }
-        } else {
-            decision = '⚖️ BALANCED - Equal weight, requires additional analysis';
-            className = 'neutral';
-        }
-        
-        this.decisionResult.textContent = decision;
-        this.decisionResult.className = `decision-result ${className}`;
+        // Update scale container height to accommodate rotation
+        const scaleContainer = document.querySelector('.scale-container');
+        const containerMinHeight = 200;
+        const totalNeededHeight = maxPanHeight + additionalHeightFromRotation + 40;
+        scaleContainer.style.minHeight = `${Math.max(containerMinHeight, totalNeededHeight)}px`;
     }
 }
 

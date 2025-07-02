@@ -274,13 +274,14 @@ header p {
     position: relative;
     background: white;
     border-radius: 16px;
-    padding: 40px;
+    padding: 40px 40px 60px 40px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
     border: 1px solid #E5E7EB;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-blend-mode: overlay;
+    min-height: 400px;
 }
 
 .scale-area::before {
@@ -315,8 +316,9 @@ header p {
 
 .scale-container {
     position: relative;
-    margin: 80px 0 120px;
+    margin: 80px 0 40px;
     z-index: 1;
+    min-height: 200px;
 }
 
 .scale-base {
@@ -359,6 +361,7 @@ header p {
     top: 12px;
     width: 200px;
     min-height: 120px;
+    max-height: none;
     background: white;
     border: 3px solid #0A1F44;
     border-radius: 100px 100px 16px 16px;
@@ -367,8 +370,9 @@ header p {
     flex-direction: column;
     align-items: center;
     padding: 16px 12px;
-    overflow: hidden;
+    overflow: visible;
     z-index: 2;
+    transition: height 0.3s ease;
 }
 
 .scale-pan:before {
@@ -384,11 +388,11 @@ header p {
 }
 
 .left-pan {
-    left: 60px;
+    left: 20px;
 }
 
 .right-pan {
-    right: 60px;
+    right: 20px;
 }
 
 .pan-label {
@@ -490,7 +494,7 @@ header p {
     font-weight: 400;
     line-height: 1.4;
     max-width: 250px;
-    z-index: 1000;
+    z-index: 10000;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -511,8 +515,30 @@ header p {
     opacity: 1;
 }
 
+.flag-tooltip.tooltip-below:after {
+    top: -12px;
+    border-top-color: transparent;
+    border-bottom-color: #0A1F44;
+}
+
+.flag-tooltip.tooltip-right:after {
+    top: 50%;
+    left: -12px;
+    transform: translateY(-50%);
+    border-top-color: transparent;
+    border-right-color: #0A1F44;
+}
+
+.flag-tooltip.tooltip-left:after {
+    top: 50%;
+    right: -12px;
+    left: auto;
+    transform: translateY(-50%);
+    border-top-color: transparent;
+    border-left-color: #0A1F44;
+}
 .decision-output {
-    margin-top: 40px;
+    margin-top: 80px;
     text-align: center;
     background: #FAFBFC;
     padding: 32px;
@@ -634,11 +660,11 @@ header p {
     }
     
     .left-pan {
-        left: 40px;
+        left: 20px;
     }
     
     .right-pan {
-        right: 40px;
+        right: 20px;
     }
     
     .button-group {
@@ -658,15 +684,23 @@ header p {
     }
     
     .left-pan {
-        left: 30px;
+        left: 15px;
     }
     
     .right-pan {
-        right: 30px;
+        right: 15px;
     }
     
     .flag-block {
         font-size: 10px;
         padding: 8px 10px;
     }
+    .scale-area {
+        padding: 30px 30px 80px 30px;
+    }
+    
+    .decision-output {
+        margin-top: 100px;
+    }
+    
 }
