@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Scale - Red vs Green Flags</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Decision Scale</h1>
+            <p>Weigh the red flags against the green flags to make informed decisions</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Sidebar for adding flags -->
+            <aside class="sidebar">
+                <div class="flag-controls">
+                    <h3>Add Flags</h3>
+                    
+                    <div class="flag-form">
+                        <input type="text" id="flagDescription" placeholder="Flag description..." maxlength="100">
+                        
+                        <div class="weight-control">
+                            <label for="flagWeight">Weight (1-10):</label>
+                            <input type="range" id="flagWeight" min="1" max="10" value="5">
+                            <span id="weightValue">5</span>
+                        </div>
+                        
+                        <textarea id="flagContext" placeholder="Optional context or notes..." rows="3"></textarea>
+                        
+                        <div class="button-group">
+                            <button id="addRedFlag" class="btn btn-red">Add Red Flag</button>
+                            <button id="addGreenFlag" class="btn btn-green">Add Green Flag</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="totals">
+                    <h4>Current Totals</h4>
+                    <div class="total-item red">
+                        <span>Red Weight:</span>
+                        <span id="redTotal">0</span>
+                    </div>
+                    <div class="total-item green">
+                        <span>Green Weight:</span>
+                        <span id="greenTotal">0</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main scale area -->
+            <main class="scale-area" style="background-image: url('ladyjustice.png'); background-color: lightblue;">
+                <div class="lady-justice-bg"></div>
+                
+                <div class="scale-container">
+                    <div class="scale-base"></div>
+                    <div class="scale-beam" id="scaleBeam">
+                        <div class="scale-pan left-pan" id="leftPan">
+                            <div class="pan-label">Red Flags</div>
+                            <div class="flags-container" id="redFlags"></div>
+                        </div>
+                        <div class="scale-pan right-pan" id="rightPan">
+                            <div class="pan-label">Green Flags</div>
+                            <div class="flags-container" id="greenFlags"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-output">
+                    <h3>Suggested Decision:</h3>
+                    <div id="decisionResult" class="decision-result">
+                        Add flags to see recommendation
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
